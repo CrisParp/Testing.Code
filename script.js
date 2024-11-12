@@ -9,7 +9,9 @@ let mouseY = -1000;
 
 // Color options for the orbs
 const colors = ['#ff0000', '#0000ff', '#00ff00', '#ffff00', '#ffffff'];
-let currentColorIndex = 0; // Start with the first color (red)
+const darkColors = ['#8b0000', '#00008b', '#006400', '#9b870c', '#333333']; // Darker colors for light background
+let currentColorIndex = 0;
+let isDarkBackground = true; // Track the current background color
 
 // Set canvas dimensions
 canvas.width = window.innerWidth;
@@ -52,6 +54,8 @@ function drawOrbs() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.shadowBlur = 10; // Glow effect
 
+    const color = isDarkBackground ? colors[currentColorIndex] : darkColors[currentColorIndex];
+
     for (const orb of xpOrbs) {
         // Distance from cursor to orb
         const dx = orb.x - mouseX;
@@ -62,7 +66,7 @@ function drawOrbs() {
         let currentRadius = orb.radius;
         if (distance < 100) {
             currentRadius += 2;
-            ctx.strokeStyle = `rgba(${hexToRgb(colors[currentColorIndex], 1 - distance / 100)})`;
+            ctx.strokeStyle = `rgba(${hexToRgb(color, 1 - distance / 100)})`;
             ctx.beginPath();
             ctx.moveTo(mouseX, mouseY);
             ctx.lineTo(orb.x, orb.y);
@@ -70,8 +74,8 @@ function drawOrbs() {
         }
 
         // Draw orb with current color and glow
-        ctx.fillStyle = colors[currentColorIndex];
-        ctx.shadowColor = colors[currentColorIndex];
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
         ctx.beginPath();
         ctx.arc(orb.x, orb.y, currentRadius, 0, Math.PI * 2);
         ctx.fill();
@@ -110,6 +114,12 @@ window.addEventListener('mousemove', (event) => {
 // Color switch button event listener
 document.getElementById('colorSwitch').addEventListener('click', () => {
     currentColorIndex = (currentColorIndex + 1) % colors.length; // Cycle to next color
+});
+
+// Background switch button event listener
+document.getElementById('backgroundSwitch').addEventListener('click', () => {
+    isDarkBackground = !isDarkBackground;
+    document.body.style.backgroundColor = isDarkBackground ? '#000' : '#fff';
 });
 
 // Adjust canvas size on resize

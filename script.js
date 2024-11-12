@@ -7,6 +7,11 @@ const maxOrbs = 500;
 let mouseX = -1000; // Initial position off-canvas to avoid interference
 let mouseY = -1000;
 
+// Color options for the orbs
+const colors = ['#ff0000', '#0000ff', '#00ff00', '#ffff00', '#ffffff'];
+let currentColorIndex = 0; // Start with the first color (red)
+
+// Set canvas dimensions
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -45,6 +50,7 @@ function updateOrbs() {
 // Draw XP orbs with glow effect and interaction
 function drawOrbs() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.shadowBlur = 10; // Glow effect
 
     for (const orb of xpOrbs) {
         // Distance from cursor to orb
@@ -52,26 +58,33 @@ function drawOrbs() {
         const dy = orb.y - mouseY;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // If close to cursor, make it slightly bigger
+        // Increase size if close to cursor
         let currentRadius = orb.radius;
         if (distance < 100) {
             currentRadius += 2;
-            ctx.strokeStyle = `rgba(0, 255, 0, ${1 - distance / 100})`; // Faded line
+            ctx.strokeStyle = `rgba(${hexToRgb(colors[currentColorIndex], 1 - distance / 100)})`;
             ctx.beginPath();
             ctx.moveTo(mouseX, mouseY);
             ctx.lineTo(orb.x, orb.y);
             ctx.stroke();
         }
 
-        // Draw orb with green glow effect
-        ctx.fillStyle = `rgba(0, 255, 0, 0.8)`; // Green XP color
-        ctx.shadowColor = "rgba(0, 255, 0, 0.5)"; // Green shadow for glow effect
-        ctx.shadowBlur = 10; // Amount of glow
-
+        // Draw orb with current color and glow
+        ctx.fillStyle = colors[currentColorIndex];
+        ctx.shadowColor = colors[currentColorIndex];
         ctx.beginPath();
         ctx.arc(orb.x, orb.y, currentRadius, 0, Math.PI * 2);
         ctx.fill();
     }
+}
+
+// Function to convert hex color to rgba
+function hexToRgb(hex, alpha = 1) {
+    const bigint = parseInt(hex.replace('#', ''), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 // Animation loop
@@ -92,6 +105,11 @@ animate();
 window.addEventListener('mousemove', (event) => {
     mouseX = event.clientX;
     mouseY = event.clientY;
+});
+
+// Color switch button event listener
+document.getElementById('colorSwitch').addEventListener('click', () => {
+    currentColorIndex = (currentColorIndex + 1) % colors.length; // Cycle to next color
 });
 
 // Adjust canvas size on resize
